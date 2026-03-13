@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quest Habit RPG</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>Quest Habit RPG</h1>
+        <p>Level up your real life, one quest at a time.</p>
+      </div>
+      <div class="topbar-actions">
+        <button id="theme-toggle" class="ghost-btn">Toggle Theme</button>
+        <button id="open-collection" class="ghost-btn">Collection</button>
+        <span id="today-label"></span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel character-panel">
+        <h2>Hero Dashboard</h2>
+        <div class="equipment-grid">
+          <div class="equip-card">
+            <span>Helmet</span>
+            <div id="slot-head" class="equip-slot"></div>
+          </div>
+          <div class="equip-card">
+            <span>Armor</span>
+            <div id="slot-armor" class="equip-slot"></div>
+          </div>
+          <div class="equip-card">
+            <span>Shield</span>
+            <div id="slot-shield" class="equip-slot"></div>
+          </div>
+          <div class="equip-card">
+            <span>Pet</span>
+            <div id="slot-pet" class="equip-slot"></div>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><span>Health</span><progress id="health-bar" max="100" value="100"></progress><strong id="health-text"></strong></div>
+          <div class="stat"><span>Mana</span><progress id="mana-bar" max="100" value="60"></progress><strong id="mana-text"></strong></div>
+          <div class="stat"><span>XP</span><progress id="xp-bar" max="100" value="0"></progress><strong id="xp-text"></strong></div>
+        </div>
+        <div class="meta-grid">
+          <div><span>Level</span><strong id="level-text"></strong></div>
+          <div><span>Reward Points</span><strong id="points-text"></strong></div>
+          <div><span>Streak Bonus</span><strong id="streak-text"></strong></div>
+          <div><span>Daily Quest</span><strong id="daily-quest-text"></strong></div>
+        </div>
+        <div id="setback-message" class="setback-message"></div>
+      </section>
+
+      <section class="panel tab-panel">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="habits">Habits</button>
+          <button class="tab-btn" data-tab="todos">To-Dos</button>
+        </div>
+
+        <div id="tab-habits" class="tab-content active">
+          <div class="section-head">
+            <h2>Today's Habits</h2>
+            <button id="open-habit-modal" class="icon-btn">＋</button>
+          </div>
+          <input id="habit-filter" placeholder="Search habits by title or tag" />
+          <div id="habit-list" class="list"></div>
+        </div>
+
+        <div id="tab-todos" class="tab-content">
+          <div class="section-head">
+            <h2>Active To-Dos</h2>
+            <button id="open-todo-modal" class="icon-btn">＋</button>
+          </div>
+          <input id="todo-filter" placeholder="Search to-dos by title or tag" />
+          <div id="todo-active" class="list"></div>
+
+          <button id="open-completed-view" class="link-btn">Completed To-Dos →</button>
+        </div>
+      </section>
+
+      <section class="panel inventory-panel">
+        <div class="section-head">
+          <h2>Inventory & Collection</h2>
+          <button id="open-custom-item-modal" class="ghost-btn">+ Add Custom Item</button>
+        </div>
+        <p>Unlock and equip items for your hero.</p>
+        <div id="inventory-list" class="inventory-grid"></div>
+
+        <h2>Achievements</h2>
+        <div id="achievement-list" class="achievement-list"></div>
+      </section>
+
+      <section class="panel analytics-panel">
+        <h2>Progress Summary</h2>
+        <div id="summary-cards" class="summary-cards"></div>
+        <h3>Weekly Habit Progress</h3>
+        <div id="weekly-bars" class="weekly-bars"></div>
+        <h3>Monthly Completion Heatmap</h3>
+        <div id="heatmap" class="heatmap"></div>
+      </section>
+    </main>
+
+    <div id="overlay" class="overlay hidden">
+      <div class="modal">
+        <div class="modal-head">
+          <h3 id="modal-title"></h3>
+          <button id="close-modal" class="ghost-btn">Close</button>
+        </div>
+        <div id="modal-body"></div>
+      </div>
+    </div>
+
+    <template id="blank-template"><div></div></template>
+
+    <template id="habit-form-template">
+      <form id="habit-form">
+        <input name="title" placeholder="Habit title" required />
+        <textarea name="description" placeholder="Habit description (Markdown supported)"></textarea>
+        <div class="grid-2">
+          <select name="type"><option value="positive">Positive</option><option value="negative">Negative</option></select>
+          <select name="difficulty"><option value="easy">Easy</option><option value="normal">Normal</option><option value="hard">Hard</option></select>
+          <select name="frequency"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
+          <select name="stat"><option value="health">Health</option><option value="experience">Experience</option><option value="mana">Mana</option></select>
+        </div>
+        <input name="tags" placeholder="Tags (comma separated)" />
+        <div class="grid-2">
+          <input type="number" name="target" min="1" value="1" placeholder="Daily target" />
+          <button type="submit">Add Habit</button>
+        </div>
+      </form>
+    </template>
+
+    <template id="todo-form-template">
+      <form id="todo-form">
+        <input name="title" placeholder="To-do title" required />
+        <textarea name="description" placeholder="To-do description (Markdown supported)"></textarea>
+        <textarea name="subtasks" placeholder="Subtasks, one per line"></textarea>
+        <div class="grid-2">
+          <select name="difficulty"><option value="easy">Easy</option><option value="normal">Normal</option><option value="hard">Hard</option></select>
+          <select name="stat"><option value="health">Health</option><option value="experience">Experience</option><option value="mana">Mana</option></select>
+          <input type="date" name="dueDate" />
+          <input name="tags" placeholder="Tags (comma separated)" />
+        </div>
+        <button type="submit">Add To-Do</button>
+      </form>
+    </template>
+
+    <template id="custom-item-form-template">
+      <form id="custom-item-form">
+        <input name="name" required placeholder="Item name" />
+        <input name="markdownImage" placeholder="Image markdown or URL. Example: ![](https://img.png)" />
+        <div class="grid-2">
+          <select name="slot">
+            <option value="head">Helmet</option>
+            <option value="armor">Armor</option>
+            <option value="shield">Shield</option>
+            <option value="pet">Pet</option>
+          </select>
+          <input name="cost" type="number" min="1" required placeholder="Point cost" />
+        </div>
+        <button type="submit">Add Custom Item (Locked)</button>
+      </form>
+    </template>
+
+    <template id="habit-card-template">
+      <article class="card">
+        <div class="card-head"><h3 class="title"></h3><span class="pill difficulty"></span></div>
+        <div class="description"></div>
+        <div class="badge-row"></div>
+        <div class="actions"></div>
+      </article>
+    </template>
+
+    <template id="todo-card-template">
+      <article class="card">
+        <div class="card-head"><h3 class="title"></h3><span class="pill difficulty"></span></div>
+        <div class="description"></div>
+        <ul class="subtasks"></ul>
+        <div class="badge-row"></div>
+        <div class="actions"></div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
